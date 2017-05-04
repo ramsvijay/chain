@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-        "encoding/json"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
+
 )
 
 // SimpleChaincode example simple Chaincode implementation
@@ -17,7 +17,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	fmt.Printf("Init called, initializing chaincode")
 	
 	var name,account string    // Entities
-	//var a,b string
+
        var money int // Asset holdings
 	var err error
 
@@ -166,7 +166,7 @@ func (t* SimpleChaincode) Run(stub shim.ChaincodeStubInterface, function string,
 }
 
 // Query callback representing the query of a chaincode
-func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) pb.Response {
+func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error)  {
 	fmt.Printf("Query called, determining function")
 	
 	if function != "query" {
@@ -181,7 +181,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	}
 
 	A = args[0]
-   B=args[1]
+      B=args[1]
 
 	// Get the state from the ledger
 	Avalbytes, err := stub.GetState(A)
@@ -208,13 +208,7 @@ if err != nil {
 
 	jsonResp := "{\"Name\":\"" + A + "\",\"Account\":\"" + string(Avalbytes) + "\",\"amount\":\""+string(Bvalbytes)+"\"}"
 	fmt.Printf("Query Response:%s\n", jsonResp)
-var buffer bytes.Buffer
-buffer.WriteString("[")
-buffer.WriteString(",")
 
-buffer.WriteString("{\"Name\":\"" + A + "\",\"Account\":\"" + string(Avalbytes) + "\",\"amount\":\""+string(Bvalbytes)+"\"}")
-
-	buffer.WriteString("]")
 
 	return Avalbytes, nil
 }
