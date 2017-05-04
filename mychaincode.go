@@ -18,7 +18,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	
 	var name,account string    // Entities
 
-       var money int // Asset holdings
+       var money string // Asset holdings
 	var err error
 
 	if len(args) != 6 {
@@ -28,21 +28,17 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	// Initialize the chaincode
         name=args[0]
         account =args[1]
-        //money=args[2]
-	money, err = strconv.Atoi(args[2])
+
+	money, err =args[2]
 	if err != nil {
 		return nil, errors.New("Expecting integer value for asset holding")
 	}
-	
-	//fmt.Printf("Aval = %d, Bval = %d\n", Aval, Bval)
-
 	// Write the state to the ledger
 	err = stub.PutState(name, []byte(account))
 	if err != nil {
 		return nil, err
 	}
-
-	err = stub.PutState(account, []byte(strconv.Itoa(money)))
+      err = stub.PutState(account, []byte(money))
 	if err != nil {
 		return nil, err
 	}
@@ -54,10 +50,9 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 func (t *SimpleChaincode) invoke(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	fmt.Printf("Running invoke")
 	
-
 	var name, account string    // Entities
-       var Aval string	
-        var Bval int // Asset holdings
+       var A string	
+        var Bl int // Asset holdings
 	var X int          // Transaction value
 	var err error
 
@@ -70,32 +65,32 @@ func (t *SimpleChaincode) invoke(stub shim.ChaincodeStubInterface, args []string
 
 	// Get the state from the ledger
 	// TODO: will be nice to have a GetAllState call to ledger
-	Avalbytes, err := stub.GetState(name)
+	Abytes, err := stub.GetState(name)
 	if err != nil {
 		return nil, errors.New("Failed to get state")
 	}
-	if Avalbytes == nil {
+	if Abytes == nil {
 		return nil, errors.New("Entity not found")
 	}
-	Aval,_= string(Avalbytes)
+	Al,_= string(Abytes)
 
-	Bvalbytes, err := stub.GetState(Aval)
+	Bbytes, err := stub.GetState(A)
 	if err != nil {
 		return nil, errors.New("Failed to get state")
 	}
-	if Bvalbytes == nil {
+	if Bbytes == nil {
 		return nil, errors.New("Entity not found")
 	}
-	Bval, _ = strconv.Atoi(string(Bvalbytes))
+	B, _ = strconv.Atoi(string(Bbytes))
 
 	// Perform the execution
 	X, err = strconv.Atoi(args[2])
 	
-	Bval = Bval - X
+	B = B - X
 	fmt.Printf("Aval = %d, Bval = %d\n", Aval, Bval)
 
 	// Write the state back to the ledger
-	err = stub.PutState(Aval, []byte(strconv.Itoa(Bval)))
+	err = stub.PutState(A, []byte(strconv.Itoa(B)))
 	if err != nil {
 		return nil, err
 	}
@@ -184,33 +179,33 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
       B=args[1]
 
 	// Get the state from the ledger
-	Avalbytes, err := stub.GetState(A)
+	Abytes, err := stub.GetState(A)
 
 	if err != nil {
 		jsonResp := "{\"Error\":\"Failed to get state for " + A + "\"}"
 		return nil, errors.New(jsonResp)
 	}
 
-	if Avalbytes == nil {
+	if Abytes == nil {
 		jsonResp := "{\"Error\":\"Nil amount for " + A + "\"}"
 		return nil, errors.New(jsonResp)
 	}
-        Bvalbytes,err:=stub.GetState(B)
+        Bbytes,err:=stub.GetState(B)
 if err != nil {
 		jsonResp := "{\"Error\":\"Failed to get state for " + A + "\"}"
 		return nil, errors.New(jsonResp)
 	}
 
-	if Bvalbytes == nil {
+	if Bbytes == nil {
 		jsonResp := "{\"Error\":\"Nil amount for " + A + "\"}"
 		return nil, errors.New(jsonResp)
 	}
 
-	jsonResp := "{\"Name\":\"" + A + "\",\"Account\":\"" + string(Avalbytes) + "\",\"amount\":\""+string(Bvalbytes)+"\"}"
+	jsonResp := "{\"Name\":\"" + A + "\",\"Account\":\"" + string(Abytes) + "\",\"amount\":\""+ string(Bbytes) +"\"}"
 	fmt.Printf("Query Response:%s\n", jsonResp)
 
 
-	return Avalbytes, nil
+	return Abytes, nil
 }
 
 func main() {
